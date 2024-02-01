@@ -1,0 +1,14 @@
+# Server
+[ ] Create a timeout for 300s or something
+[ ] postgresql CRUD subroutines.
+[ ] REGISTER 
+[ ] LOGIN
+[ ] SAY (msg to all clients)
+
+# Client
+[ ] Create a checkin-in ping to prevent timeout.
+[ ] Create STATES
+[ ] Command list ?
+[ ] REGISTER subroutine
+[ ] LOGIN subroutine
+[ ] SAY command

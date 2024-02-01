@@ -1,0 +1,62 @@
+# Polling
+
+```
+struct pollfd pfds[1];
+int numbytes;
+char buff[512];
+
+/* socket stuff here */
+
+pfds[0].fd = 0 // 0 represents stdin
+pfds[0].events = POLLIN; // check ready to read
+
+while ((numbytes = recv(irc_socket, buff, sizeof(buff), 0)) != -1) {
+
+buff[numbytes] = '\0';
+printf("%s\n", buff);
+
+int poll_count = poll(pfds, 1, 1000);
+
+if (poll_count == -1) {
+perror("poll error");
+exit(EXIT_FAILURE);
+
+} else if (poll_count > 0) {
+fgets(buff, 512, stdin);
+printf("%s\n", buff);
+numbytes = send(irc_socket, buff, 512, 0);
+}
+```
+
+^ This is some guy's code but it's not working.
+The response was below:
+
+You should put both the socket and stdin in the pfds array. When poll returns, you can check the revents of each file descriptor to see what action you need to take.
+
+The code will look something like this:
+
+```
+pfds[0].fd = STDIN_FILENO;
+pfds[0].events = POLLIN;
+pfds[1].fd = socket;
+pfds[1].events = POLLIN;
+
+while(poll(pfds, 2, ...) != -1) { /* error handling elided */
+  if(pfds[0].revents & POLLIN) {
+    // read data from stdin and send it over the socket
+    read(STDIN_FILENO, ...);
+    send(socket, ...); // repeat as necessary.
+  }
+  if(pfds[1].revents & POLLIN) {
+    // chat data received
+    recv(socket, ...)
+  }
+  if(pfds[1].revents & (POLLERR | POLLHUP)) {
+    // socket was closed
+  }
+}
+
+```
+
+Your current code waits until something was received on the irc_socket before it checks stdin. I suggest reading the poll(2) manual carefully.
+
